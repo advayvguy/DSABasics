@@ -14,8 +14,110 @@ def helper(root):
 def copyRecursive(root):
     return helper(root)
 
+def sindiff(root):
+    top = Node(Token('*', 'OPERATOR'))
+    top.left = differentiator(copyRecursive(root.left))
+    top.right = Node(Token('cos', 'FUNCTION'))
+    top.right.left = root.left
+    return top
+
+def cosdiff(root):
+    top = Node(Token('*', 'OPERATOR'))
+    top.left = Node(Token('-1', 'CONSTANT'))
+    top.right = Node(Token('*', 'OPERATOR'))
+    top.right.left = differentiator(copyRecursive(root.left))
+    top.right.right = Node(Token('sin', 'FUNCTION'))
+    top.right.right.left = root.left
+    return top
+
+def lndiff(root):
+    top = Node(Token('/', 'OPERATOR'))
+    top.left = differentiator(copyRecursive(root.left))
+    top.right = root.left
+    return top
+
+def powdiff(root):
+    f = root.left
+    g = root.right
+    top = Node(Token('*', 'OPERATOR'))
+    top.left = Node(Token('^', 'OPERATOR'))
+    top.left.left = copyRecursive(f)
+    top.left.right = copyRecursive(g)
+    top.right = Node(Token('+', 'OPERATOR'))
+    top.right.left = Node(Token('*', 'OPERATOR'))
+    top.right.right = Node(Token('*', 'OPERATOR'))
+    top.right.left.left = differentiator(copyRecursive(g))
+    top.right.left.right = Node(Token('ln', 'FUNCTION'))
+    top.right.left.right.left = copyRecursive(f)
+    top.right.right.left = copyRecursive(g)
+    top.right.right.right = Node(Token('/', 'OPERATOR'))
+    top.right.right.right.left = differentiator(copyRecursive(f))
+    top.right.right.right.right = copyRecursive(f)
+    return top
+
+def tandiff(root):
+    x = root.left
+    top = Node(Token('*', 'OPERATOR'))
+    top.left = differentiator(copyRecursive(x))
+    top.right = Node(Token('^', 'OPERATOR'))
+    top.right.left = Node(Token('sec', 'FUNCTION'))
+    top.right.left.left = copyRecursive(x)
+    top.right.right = Node(Token('2', 'CONSTANT'))
+    return top
+
+def cotdiff(root):
+    x = root.left
+    top = Node(Token('*', 'OPERATOR'))
+    top.left = Node(Token('-1', 'CONSTANT'))
+    top.right = Node(Token('*', 'OPERATOR'))
+    top.right.left = differentiator(copyRecursive(x))
+    top.right.right = Node(Token('^', 'OPERATOR'))
+    top.right.right.left = Node(Token('csc', 'FUNCTION'))
+    top.right.right.right = Node(Token('2', 'CONSTANT'))
+    top.right.right.left.left = copyRecursive(x)
+    return top
+
+def secdiff(root):
+    x = root.left
+    top = Node(Token('*', 'OPERATOR'))
+    top.left = differentiator(copyRecursive(x))
+    top.right = Node(Token('*', 'OPERATOR'))
+    top.right.left = Node(Token('sec', 'FUNCTION'))
+    top.right.right = Node(Token('tan','FUNCTION'))
+    top.right.left.left = copyRecursive(x)
+    top.right.right.left = copyRecursive(x)
+    return top
+
+def cscdiff(root):
+    x = root.left
+    top = Node(Token('*', 'OPERATOR'))
+    top.left = Node(Token('-1', 'CONSTANT'))
+    top.right = Node(Token('*', 'OPERATOR'))
+    top.right.left = differentiator(copyRecursive(x))
+    top.right.right = Node(Token('*', 'OPERATOR'))
+    top.right.right.left = Node(Token('csc', 'FUNCTION'))
+    top.right.right.right = Node(Token('cot', 'FUNCTION'))
+    top.right.right.left.left = copyRecursive(x)
+    top.right.right.right.left = copyRecursive(x)
+    return top
+
 def differentiator(root):
-    if root.value.value == '^':
+    if root.value.type == 'FUNCTION':
+        if root.value.value == 'sin':
+            root = sindiff(root)
+        elif root.value.value == 'cos':
+            root = cosdiff(root)
+        elif root.value.value == 'ln':
+            root = lndiff(root)
+        elif root.value.value == 'csc':
+            root = cscdiff(root)
+        elif root.value.value == 'sec':
+            root = secdiff(root)
+        elif root.value.value == 'tan':
+            root = tandiff(root)
+        elif root.value.value == 'cot':
+            root = cotdiff(root)
+    elif root.value.value == '^':
         if root.right.value.type == 'CONSTANT':
             num = root.right.value.value
             expr = root.left
@@ -27,6 +129,8 @@ def differentiator(root):
             root.right.left = differentiator(copyRecursive(expr))
             root.value = Token('*', 'OPERATOR')
             return root 
+        else:
+            root = powdiff(root)
         
     elif root.value.type == 'CONSTANT':
         return Node(Token('0', 'CONSTANT'))

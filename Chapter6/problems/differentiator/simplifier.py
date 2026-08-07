@@ -10,7 +10,13 @@ operators = {
     '^': operator.pow
 }
 
+def iszero(node):
+    return node.value.type == 'CONSTANT' and float(node.value.value) == 0
+
 def simplifier(root):
+    if root is None:
+        return None
+    
     if root.left is None and root.right is None:
         return root
 
@@ -18,18 +24,20 @@ def simplifier(root):
     root.right = simplifier(root.right)
     
     #folding
-    if root.left.value.type == 'CONSTANT' and root.right.value.type == 'CONSTANT':
+    if (root.left.value.value != 'e' and (root.right is None or root.right.value.value != 'e')) and (root.left.value.type == 'CONSTANT' and (root.right is not None and root.right.value.type == 'CONSTANT')):
         n1 = Node(Token(str(operators[root.value.value](int(root.left.value.value), int(root.right.value.value))), 'CONSTANT'))
         return n1 
     
     #some other simplifications
+    elif root.value.value == 'ln' and root.left.value.value == 'e':
+        return Node(Token('1', 'CONSTANT'))
     elif root.value.value == '+' or root.value.value == '-':
         if root.left.value.value == '0' and root.value.value == '+':
             return root.right
         elif root.right.value.value == '0':
             return root.left
     elif root.value.value == '*':
-        if root.left.value.value == '0' or root.right.value.value == '0':
+        if iszero(root.left) or iszero(root.right):
             return Node(Token('0', 'CONSTANT'))
         elif root.left.value.value == '1':
             return root.right

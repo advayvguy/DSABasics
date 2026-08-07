@@ -27,13 +27,18 @@ def Shunting_yard(tokenStream):
             while operator.size() > 0 and operator.peek().type != 'OPENBRACES':
                 output.append(operator.pop())
             operator.pop()
+            if operator.size() > 0 and operator.peek().type == 'FUNCTION':
+                output.append(operator.pop())
         
+        elif token.type == 'FUNCTION':
+            operator.push(token)
+
         elif token.type == 'OPERATOR':
             #if token is exponent
             if token.value == '^':
                 operator.push(token) #regardless of anyting you push it
             else:
-                while operator.size() > 0 and getprecedence(operator.peek()) >= getprecedence(token):
+                while operator.size() > 0 and operator.peek().type == 'OPERATOR' and getprecedence(operator.peek()) >= getprecedence(token):
                     output.append(operator.pop())
                 operator.push(token)
     
@@ -47,6 +52,11 @@ def build_ast(postFix):
     for token in postFix:
         if token.type in ['VARIABLE', 'CONSTANT']:
             stack.push(Node(token))
+        elif token.type == 'FUNCTION':
+            n = stack.pop()
+            opnode = Node(token)
+            opnode.left = n
+            stack.push(opnode)
         else:
             n1 = stack.pop()
             n2 = stack.pop()
@@ -55,3 +65,8 @@ def build_ast(postFix):
             opnode.right = n1
             stack.push(opnode)
     return stack.pop()
+'''
+expr = "sin(sin(sin(ln(x))))"
+tokenStream = Lexer(expr)
+print(Shunting_yard(tokenStream))
+'''

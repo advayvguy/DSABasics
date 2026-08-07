@@ -4,7 +4,7 @@ from AST import Shunting_yard, build_ast
 from differentiator import differentiator
 from evaluator import print_expr
 
-expr = input("enter an expression: ")
+expr = input("")
 
 tokenStream = Lexer(expr)
 postfixStream = Shunting_yard(tokenStream)

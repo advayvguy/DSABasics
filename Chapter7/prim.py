@@ -1,3 +1,5 @@
+#O((V+E)log(V))
+
 from Dijkestra import PriorityQueue
 from general_dfs import Graph
 

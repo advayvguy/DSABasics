@@ -25,7 +25,7 @@ def missionary_transport(onshore, offshore):
     
 
 def main():
-    onshore = [6,6]
+    onshore = [3,3]
     offshore = [0,0]
     print("C gets on boat")
     onshore[1] = onshore[1] - 1
